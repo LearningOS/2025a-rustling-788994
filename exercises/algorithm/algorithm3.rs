@@ -3,10 +3,38 @@
 	This problem requires you to implement a sorting algorithm
 	you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
+//
 
-fn sort<T>(array: &mut [T]){
+fn sort<T:Ord>(array: &mut [T]){
 	//TODO
+    // 如果数组长度 <= 1，直接返回（已经有序）
+    if array.len() <= 1 {
+        return;
+    }
+
+    let mut swapped;
+    let mut n = array.len();
+
+    // 冒泡排序核心逻辑
+    loop {
+        swapped = false;
+        // 遍历未排序部分，比较相邻元素
+        for i in 1..n {
+            // 如果前一个元素大于后一个，交换位置
+            if array[i - 1] > array[i] {
+                array.swap(i - 1, i);
+                swapped = true;
+            }
+        }
+
+        // 每轮结束后，最后一个元素已排序，缩小遍历范围
+        n -= 1;
+
+        // 如果本轮没有交换，说明数组已完全有序，退出循环
+        if !swapped {
+            break;
+        }
+    }
 }
 #[cfg(test)]
 mod tests {

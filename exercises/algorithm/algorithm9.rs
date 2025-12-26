@@ -2,7 +2,7 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+// I AM NOT
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,6 +38,35 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+        // 从最后一个位置上浮
+        self.bubble_up(self.count);
+    }
+
+    fn bubble_up(&mut self, mut idx: usize) {
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            // 如果当前节点优先级高于父节点，交换（comparator 定义优先级：最小堆 a<b，最大堆 a>b）
+            if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+                self.items.swap(idx, parent_idx);
+                idx = parent_idx;
+            } else {
+                break; // 满足堆性质，停止上浮
+            }
+        }
+    }
+    fn bubble_down(&mut self, mut idx: usize) {
+        while self.children_present(idx) {
+            let child_idx = self.smallest_child_idx(idx);
+            // 如果子节点优先级高于当前节点，交换
+            if (self.comparator)(&self.items[child_idx], &self.items[idx]) {
+                self.items.swap(idx, child_idx);
+                idx = child_idx;
+            } else {
+                break; // 满足堆性质，停止下沉
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +87,20 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+
+        // 只有左子节点
+        if right_idx > self.count {
+            return left_idx;
+        }
+
+        // 比较左右子节点，返回优先级更高的那个
+        if (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
+            left_idx
+        } else {
+            right_idx
+        }
     }
 }
 
@@ -79,13 +121,25 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default+Clone,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        // 取出堆顶元素（索引 1）
+        let top = self.items[1].clone();
+        // 将最后一个元素移到堆顶
+        self.items[1] = self.items[self.count].clone();
+        self.count -= 1;
+        self.items.pop(); // 移除最后一个元素
+        // 从堆顶下沉
+        self.bubble_down(1);
+
+        Some(top)
     }
 }
 

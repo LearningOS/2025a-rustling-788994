@@ -3,10 +3,9 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
+
 use std::cmp::Ordering;
 use std::fmt::Debug;
-
 
 #[derive(Debug)]
 struct TreeNode<T>
@@ -37,39 +36,69 @@ where
             right: None,
         }
     }
+
+    // 辅助方法：在当前节点的子树中插入值
+    fn insert(&mut self, value: T) {
+        match value.cmp(&self.value) {
+            // 插入值小于当前节点值 → 插入左子树
+            Ordering::Less => {
+                if let Some(ref mut left_node) = self.left {
+                    left_node.insert(value);
+                } else {
+                    self.left = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+            // 插入值大于当前节点值 → 插入右子树
+            Ordering::Greater => {
+                if let Some(ref mut right_node) = self.right {
+                    right_node.insert(value);
+                } else {
+                    self.right = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+            // 相等则不处理（BST 不存储重复值）
+            Ordering::Equal => (),
+        }
+    }
 }
 
 impl<T> BinarySearchTree<T>
 where
     T: Ord,
 {
-
     fn new() -> Self {
         BinarySearchTree { root: None }
     }
 
-    // Insert a value into the BST
+    // 插入值到 BST
     fn insert(&mut self, value: T) {
-        //TODO
+        if let Some(ref mut root_node) = self.root {
+            // 根节点存在，调用节点的 insert 方法
+            root_node.insert(value);
+        } else {
+            // 根节点为空，新建根节点
+            self.root = Some(Box::new(TreeNode::new(value)));
+        }
     }
 
-    // Search for a value in the BST
+    // 查找值是否存在于 BST 中
     fn search(&self, value: T) -> bool {
-        //TODO
-        true
+        // 从根节点开始查找
+        let mut current = &self.root;
+        while let Some(ref node) = current {
+            match value.cmp(&node.value) {
+                // 找到匹配值 → 返回 true
+                Ordering::Equal => return true,
+                // 查找值更小 → 去左子树找
+                Ordering::Less => current = &node.left,
+                // 查找值更大 → 去右子树找
+                Ordering::Greater => current = &node.right,
+            }
+        }
+        // 遍历完所有节点未找到 → 返回 false
+        false
     }
 }
-
-impl<T> TreeNode<T>
-where
-    T: Ord,
-{
-    // Insert a node into the tree
-    fn insert(&mut self, value: T) {
-        //TODO
-    }
-}
-
 
 #[cfg(test)]
 mod tests {

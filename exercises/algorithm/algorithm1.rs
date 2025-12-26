@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+//
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -47,7 +47,7 @@ impl<T> LinkedList<T> {
     pub fn add(&mut self, obj: T) {
         let mut node = Box::new(Node::new(obj));
         node.next = None;
-        let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
+        let node_ptr =  NonNull::new(Box::into_raw(node));
         match self.end {
             None => self.start = node_ptr,
             Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
@@ -70,13 +70,57 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
+
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
+    where
+        T: Ord+Clone, // 要求 T 实现 Ord 特质，支持比较大小
+        {
+            let mut merged_list = LinkedList::new();
+            // 初始化两个指针，指向两个链表的头节点
+            let mut ptr_a = list_a.start;
+            let mut ptr_b = list_b.start;
+
+            // 双指针循环比较，直到其中一个链表遍历完毕
+            while let (Some(a), Some(b)) = (ptr_a, ptr_b) {
+                let a_node = unsafe { a.as_ref() };
+                let b_node = unsafe { b.as_ref() };
+
+                // 比较节点值，将较小的节点添加到新链表
+                if a_node.val <= b_node.val {
+                    // 取出 ptr_a 指向的节点，添加到新链表
+                    merged_list.add(a_node.val.clone()); // 注意：需要 T 实现 Clone（下方补充约束）
+                    // 移动 ptr_a 到下一个节点
+                    ptr_a = a_node.next;
+                } else {
+                    // 取出 ptr_b 指向的节点，添加到新链表
+                    merged_list.add(b_node.val.clone());
+                    // 移动 ptr_b 到下一个节点
+                    ptr_b = b_node.next;
+                }
+            }
+
+            // 处理 list_a 剩余的节点
+            while let Some(a) = ptr_a {
+                let a_node = unsafe { a.as_ref() };
+                merged_list.add(a_node.val.clone());
+                ptr_a = a_node.next;
+            }
+
+            // 处理 list_b 剩余的节点
+            while let Some(b) = ptr_b {
+                let b_node = unsafe { b.as_ref() };
+                merged_list.add(b_node.val.clone());
+                ptr_b = b_node.next;
+            }
+
+            merged_list
+
+
+		// Self {
+        //     length: 0,
+        //     start: None,
+        //     end: None,
+        // }
 	}
 }
 
@@ -103,6 +147,9 @@ where
         }
     }
 }
+
+// 为了支持 val.clone()，需要为 LinkedList<T> 的方法补充 Clone 约束
+impl<T: Clone + Ord> LinkedList<T> {}
 
 #[cfg(test)]
 mod tests {

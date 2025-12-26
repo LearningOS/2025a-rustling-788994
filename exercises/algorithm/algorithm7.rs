@@ -3,7 +3,7 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-// I AM NOT DONE
+//
 #[derive(Debug)]
 struct Stack<T> {
 	size: usize,
@@ -32,7 +32,13 @@ impl<T> Stack<T> {
 	}
 	fn pop(&mut self) -> Option<T> {
 		// TODO
-		None
+		if self.is_empty() {
+			None
+		} else {
+			self.size -= 1;
+			self.data.pop()
+		}
+
 	}
 	fn peek(&self) -> Option<&T> {
 		if 0 == self.size {
@@ -53,7 +59,7 @@ impl<T> Stack<T> {
 		let mut iterator = Iter { 
 			stack: Vec::new() 
 		};
-		for item in self.data.iter() {
+		for item in self.data.iter().rev() {
 			iterator.stack.push(item);
 		}
 		iterator
@@ -62,7 +68,7 @@ impl<T> Stack<T> {
 		let mut iterator = IterMut { 
 			stack: Vec::new() 
 		};
-		for item in self.data.iter_mut() {
+		for item in self.data.iter_mut().rev() {
 			iterator.stack.push(item);
 		}
 		iterator
@@ -102,7 +108,36 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 fn bracket_match(bracket: &str) -> bool
 {
 	//TODO
-	true
+	let mut stack = Stack::new();
+
+	// 遍历字符串中的每个字符
+	for c in bracket.chars() {
+		match c {
+			// 左括号压入栈
+			'(' | '{' | '[' => stack.push(c),
+			// 右括号检查匹配
+			')' => {
+				if stack.pop() != Some('(') {
+					return false;
+				}
+			}
+			'}' => {
+				if stack.pop() != Some('{') {
+					return false;
+				}
+			}
+			']' => {
+				if stack.pop() != Some('[') {
+					return false;
+				}
+			}
+			// 非括号字符忽略
+			_ => continue,
+		}
+	}
+
+	// 遍历结束后，栈必须为空（避免左括号多余）
+	stack.is_empty()
 }
 
 #[cfg(test)]

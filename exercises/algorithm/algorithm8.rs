@@ -2,7 +2,7 @@
 	queue
 	This question requires you to use queues to implement the functionality of the stac
 */
-// I AM NOT DONE
+//
 
 #[derive(Debug)]
 pub struct Queue<T> {
@@ -55,8 +55,10 @@ impl<T> Default for Queue<T> {
 pub struct myStack<T>
 {
 	//TODO
-	q1:Queue<T>,
-	q2:Queue<T>
+    // 两个队列，q1 作为主要存储队列，q2 作为中转
+    q1: Queue<T>,
+    q2: Queue<T>,
+
 }
 impl<T> myStack<T> {
     pub fn new() -> Self {
@@ -68,14 +70,41 @@ impl<T> myStack<T> {
     }
     pub fn push(&mut self, elem: T) {
         //TODO
+        if self.q1.is_empty() {
+            self.q2.enqueue(elem);
+        } else {
+            self.q1.enqueue(elem);
+        }
     }
     pub fn pop(&mut self) -> Result<T, &str> {
         //TODO
-		Err("Stack is empty")
+        // 确定主队列（有元素的队列）和中转队列
+        let (main_q, temp_q) = if self.q1.is_empty() {
+            (&mut self.q2, &mut self.q1)
+        } else {
+            (&mut self.q1, &mut self.q2)
+        };
+
+        // 如果主队列为空，返回错误
+        if main_q.is_empty() {
+            return Err("Stack is empty");
+        }
+
+        // 将主队列的前 n-1 个元素转移到中转队列
+        while main_q.size() > 1 {
+            let elem = main_q.dequeue().unwrap(); // 主队列非空，unwrap 安全
+            temp_q.enqueue(elem);
+        }
+
+        // 弹出主队列最后一个元素（栈顶元素）
+        main_q.dequeue()
+
+		//Err("Stack is empty")
     }
     pub fn is_empty(&self) -> bool {
 		//TODO
-        true
+        self.q1.is_empty() && self.q2.is_empty()
+        //true
     }
 }
 
